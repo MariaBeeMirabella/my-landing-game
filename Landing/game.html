@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Grammar Fix</title>
+    <style>
+        /* Game Easter Egg Button */
+        .game-easter-egg {
+            display: inline-block;
+            vertical-align: middle;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+            animation: pulse 2s infinite;
+            margin: 0 8px;
+        }
+
+        .game-easter-egg:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.5);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Game Modal */
+        .game-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .game-content {
+            background: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border: none;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+            position: relative;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .game-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: all 0.2s ease;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+        }
+
+        .game-close:hover {
+            color: #ff6b6b;
+            transform: scale(1.1);
+        }
+
+        .game-title {
+            color: #047857;
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .game-subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .game-progress {
+            background: #e5e7eb;
+            height: 8px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .game-progress-bar {
+            background: linear-gradient(45deg, #047857, #10b981);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .question-counter {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .sentence-container {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .sentence {
+            font-size: 18px;
+            color: #374151;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .clickable-word {
+            padding: 2px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            background: #f3f4f6;
+            border: 2px solid transparent;
+        }
+
+        .clickable-word:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            transform: scale(1.05);
+        }
+
+        .wrong-word {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 2px solid #fca5a5;
+        }
+
+        .answer-buttons {
+            display: none;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .answer-btn {
+            background: #047857;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        .answer-btn:hover {
+            background: #065f46;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(4, 120, 87, 0.3);
+        }
+
+        .answer-btn.correct {
+            background: #10b981;
+            animation: correctAnswer 0.6s ease;
+        }
+
+        .answer-btn.incorrect {
+            background: #ef4444;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctAnswer {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .feedback {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            min-height: 25px;
+        }
+
+        .feedback.correct {
+            color: #10b981;
+        }
+
+        .feedback.incorrect {
+            color: #ef4444;
+        }
+
+        .next-btn {
+            background: linear-gradient(45deg, #047857, #10b981);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(4, 120, 87, 0.4);
+        }
+
+        .game-result {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .result-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-message {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 25px;
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Demo page styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .demo-title {
+            color: #047857;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .demo-subtitle {
+            color: #6b7280;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+
+        .demo-instruction {
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: #047857;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 class="demo-title">🎓 English Grammar Game</h1>
+        <p class="demo-subtitle">🕵️Отличная работа! Теперь проверим ваши знания английского!</p>
+        
+        <div class="demo-instruction">
+            <p><strong>Как играть:</strong></p>
+            <p>Нажмите на эту кнопку 
+                <span class="game-easter-egg" onclick="startGame()" title="Запустить игру! 🎮">🎯</span> 
+                чтобы начать игру!
+            </p>
+            <p>Найдите ошибки в английских предложениях и исправьте их.</p>
+        </div>
+    </div>
+
+    <!-- Game Modal -->
+    <div id="gameModal" class="game-modal">
+        <div class="game-content">
+            <span class="game-close" onclick="closeGame()">&times;</span>
+            
+            <div id="gameScreen">
+                <h2 class="game-title">🕵️ Quick Grammar Fix</h2>
+                <p class="game-subtitle">Кликни на слово с ошибкой и исправь её!</p>
+                
+                <div class="game-progress">
+                    <div class="game-progress-bar" id="progressBar"></div>
+                </div>
+                
+                <div class="question-counter" id="questionCounter">Вопрос 1 из 5</div>
+                
+                <div class="sentence-container">
+                    <div class="sentence" id="sentence"></div>
+                    <div class="answer-buttons" id="answerButtons"></div>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+                
+                <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Дальше →</button>
+            </div>
+            
+            <div id="resultScreen" style="display: none;">
+                <div class="game-result">
+                    <div class="result-icon" id="resultIcon"></div>
+                    <div class="result-title" id="resultTitle"></div>
+                    <div class="result-message" id="resultMessage"></div>
+                    <button class="restart-btn" onclick="restartGame()">Играть снова</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        const questions = [
+            {
+                sentence: "I are happy",
+                wrongWord: "are",
+                correctAnswer: "am",
+                wrongAnswer: "is",
+                explanation: "С местоимением 'I' используется 'am'"
+            },
+            {
+                sentence: "She have a cat",
+                wrongWord: "have",
+                correctAnswer: "has",
+                wrongAnswer: "haves",
+                explanation: "С местоимением 'She' используется 'has', формы 'haves' не существует"
+            },
+            {
+                sentence: "Yesterday I go to the park",
+                wrongWord: "go",
+                correctAnswer: "went",
+                wrongAnswer: "goes",
+                explanation: "'Yesterday' указывает на прошедшее время - Past Simple"
+            },
+            {
+                sentence: "He don't like pizza",
+                wrongWord: "don't",
+                correctAnswer: "doesn't",
+                wrongAnswer: "not",
+                explanation: "С местоимением 'He' используется форма doesn't"
+            },
+            {
+                sentence: "Last week they was at home",
+                wrongWord: "was",
+                correctAnswer: "were",
+                wrongAnswer: "are",
+                explanation: "С местоимением 'they' в прошедшем времени используется 'were'"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        let gameStarted = false;
+
+        function startGame() {
+            document.getElementById('gameModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            resetGame();
+            showQuestion();
+        }
+
+        function closeGame() {
+            document.getElementById('gameModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function resetGame() {
+            currentQuestion = 0;
+            correctAnswers = 0;
+            gameStarted = true;
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('resultScreen').style.display = 'none';
+            updateProgress();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            const sentenceEl = document.getElementById('sentence');
+            const answerButtonsEl = document.getElementById('answerButtons');
+            const feedbackEl = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            const questionCounter = document.getElementById('questionCounter');
+
+            // Update question counter
+            questionCounter.textContent = `Вопрос ${currentQuestion + 1} из ${questions.length}`;
+
+            // Create sentence with clickable words
+            const words = question.sentence.split(' ');
+            const sentenceHTML = words.map(word => {
+                // Сохраняем апострофы и убираем только лишнюю пунктуацию
+                const cleanWord = word.replace(/[^\w']/g, '');
+                const cleanWrongWord = question.wrongWord.replace(/[^\w']/g, '');
+                // Экранируем апострофы для HTML
+                const safeWord = word.replace(/'/g, "\\'");
+                if (cleanWord === cleanWrongWord) {
+                    return `<span class="clickable-word" onclick="selectWord(this, '${safeWord}')">${word}</span>`;
+                } else {
+                    return `<span class="clickable-word" onclick="selectWord(this, '${safeWord}')">${word}</span>`;
+                }
+            }).join(' ');
+            
+            sentenceEl.innerHTML = sentenceHTML;
+
+            // Reset elements
+            answerButtonsEl.style.display = 'none';
+            answerButtonsEl.innerHTML = '';
+            feedbackEl.textContent = '';
+            feedbackEl.className = 'feedback';
+            nextBtn.style.display = 'none';
+
+            updateProgress();
+        }
+
+        function selectWord(element, word) {
+            const question = questions[currentQuestion];
+            
+            // Reset all words to normal state
+            document.querySelectorAll('.clickable-word').forEach(w => {
+                w.classList.remove('wrong-word');
+            });
+            
+            // Очищаем оба слова одинаковым образом, сохраняя апострофы
+            const cleanSelectedWord = word.replace(/[^\w']/g, '');
+            const cleanWrongWord = question.wrongWord.replace(/[^\w']/g, '');
+            
+            // Check if selected word is correct
+            if (cleanSelectedWord === cleanWrongWord) {
+                element.classList.add('wrong-word');
+                showAnswers();
+            } else {
+                // Give feedback for wrong selection
+                const feedbackEl = document.getElementById('feedback');
+                feedbackEl.textContent = '❌ Это слово правильное! Попробуй другое.';
+                feedbackEl.className = 'feedback incorrect';
+                
+                // Clear feedback after 2 seconds
+                setTimeout(() => {
+                    feedbackEl.textContent = '';
+                    feedbackEl.className = 'feedback';
+                }, 2000);
+            }
+        }
+
+        function showAnswers() {
+            const question = questions[currentQuestion];
+            const answerButtonsEl = document.getElementById('answerButtons');
+
+            // Create answer buttons (randomize order)
+            const answers = [question.correctAnswer, question.wrongAnswer];
+            const shuffledAnswers = answers.sort(() => Math.random() - 0.5);
+
+            answerButtonsEl.innerHTML = '';
+            shuffledAnswers.forEach(answer => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = answer;
+                button.onclick = () => checkAnswer(answer, question.correctAnswer);
+                answerButtonsEl.appendChild(button);
+            });
+
+            answerButtonsEl.style.display = 'flex';
+        }
+
+        function checkAnswer(selectedAnswer, correctAnswer) {
+            const feedbackEl = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            const buttons = document.querySelectorAll('.answer-btn');
+            const question = questions[currentQuestion];
+
+            // Disable all buttons
+            buttons.forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === selectedAnswer && selectedAnswer !== correctAnswer) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            if (selectedAnswer === correctAnswer) {
+                correctAnswers++;
+                feedbackEl.textContent = `✅ Правильно! ${question.explanation}`;
+                feedbackEl.className = 'feedback correct';
+            } else {
+                feedbackEl.textContent = `❌ Неправильно. ${question.explanation}`;
+                feedbackEl.className = 'feedback incorrect';
+            }
+
+            nextBtn.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const progress = ((currentQuestion) / questions.length) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        function showResult() {
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('resultScreen').style.display = 'block';
+
+        const resultIcon = document.getElementById('resultIcon');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultMessage = document.getElementById('resultMessage');
+
+        const percentage = Math.round((correctAnswers / questions.length) * 100);
+        
+        if (percentage === 100) {
+            resultIcon.textContent = '🏆';
+            resultTitle.textContent = 'Идеально!';
+            resultTitle.style.color = '#10b981';
+            resultMessage.textContent = 'Блестяще! На уроках помогу отточить мастерство до perfection!';
+        } 
+        else if (percentage >= 70) {
+            resultIcon.textContent = '🌟';
+            resultTitle.textContent = 'Отлично!';
+            resultTitle.style.color = '#10b981';
+            resultMessage.textContent = `Правильных ответов: ${correctAnswers} из ${questions.length}. Почти идеально, на занятиях разберём оставшиеся нюансы!`;
+        }
+        else if (percentage >= 40) {
+            resultIcon.textContent = '👍';
+            resultTitle.textContent = 'Хороший результат!';
+            resultTitle.style.color = '#047857';
+            resultMessage.textContent = `Правильных ответов: ${correctAnswers} из ${questions.length}. Немного практики на наших уроках- и ты освоишь эти правила!`;
+        }
+        else if (percentage > 0) {
+            resultIcon.textContent = '🤔';
+            resultTitle.textContent = 'Можно лучше!';
+            resultTitle.style.color = '#d97706';
+            resultMessage.textContent = `Правильных ответов: ${correctAnswers} из ${questions.length}. Не переживай, на наших уроках мы разберём все сложные моменты!`;
+        }
+        else {
+            resultIcon.textContent = '💪';
+            resultTitle.textContent = 'Не сдавайся!';
+            resultTitle.style.color = '#dc2626';
+            resultMessage.textContent = `Пока ни одного правильного ответа. Это только начало - с нашими уроками ты быстро наверстаешь!`;
+        }
+    }
+
+        function restartGame() {
+            resetGame();
+            showQuestion();
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeGame();
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('gameModal');
+            if (event.target === modal) {
+                closeGame();
+            }
+        }
+    </script>
+</body>
+</html>
